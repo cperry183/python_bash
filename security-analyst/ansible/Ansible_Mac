@@ -1,0 +1,85 @@
+Install Ansible on Mac OSX
+
+Brew Install
+
+If you already have Homebrew installed, then it is as simple as:
+
+> brew install ansible
+
+That's it!
+
+If you prefer to use Python and pip for the install, then read on...
+Native Python Install - Summary:
+
+Ansible uses Python and fortunately Python is already installed on modern versions of OSX.
+
+    Install Xcode
+    sudo easy_install pip
+    sudo pip install ansible --quiet
+
+Then, if you would like to update Ansible later, just do:
+
+    sudo pip install ansible --upgrade
+
+Native Python Install - Full explanation:
+Ensure Xcode is installed first
+
+Some of Ansible's dependencies need to be compiled, so you'll need the developer tools that come with Xcode.
+
+You can check if you already have the developer tools by running this:
+
+> pkgutil --pkg-info=com.apple.pkg.CLTools_Executables
+
+(note: Before OSX Mavericks, the package to check for was "com.apple.pkg.DeveloperToolsCLI")
+
+If the tools are not installed, you will see this output:
+
+> pkgutil --pkg-info=com.apple.pkg.CLTools_Executables
+No receipt for 'com.apple.pkg.CLTools_Executables' found at '/'.
+
+In that case, download and install Xcode from here.
+
+If the tools are installed, you should see output similar to this:
+
+> pkgutil --pkg-info=com.apple.pkg.CLTools_Executables
+package-id: com.apple.pkg.CLTools_Executables
+version: 5.1.0.0.1.1396320587
+volume: /
+location: /
+install-time: 1397415256
+groups: com.apple.FindSystemFiles.pkg-group com.apple.DevToolsBoth.pkg-group com.apple.DevToolsNonRelocatableShared.pkg-group
+
+Install pip
+
+pip is Python's package manager. It isn't installed on OSX by default, but you can use Python's other package manager easy_install to install it:
+
+> sudo easy_install pip
+Password:
+Searching for pip
+Reading http://pypi.python.org/simple/pip/
+Best match: pip 1.4.1
+Downloading https://pypi.python.org/packages/source/p/pip/pip-1.4.1.tar.gz#md5=6afbb46aeb48abac658d4df742bff714
+Processing pip-1.4.1.tar.gz
+Running pip-1.4.1/setup.py -q bdist_egg --dist-dir /tmp/easy_install-hVr8Pt/pip-1.4.1/egg-dist-tmp-BY70iY
+warning: no files found matching '*.html' under directory 'docs'
+warning: no previously-included files matching '*.rst' found under directory 'docs/_build'
+no previously-included directories found matching 'docs/_build/_sources'
+Adding pip 1.4.1 to easy-install.pth file
+Installing pip script to /usr/local/bin
+Installing pip-2.7 script to /usr/local/bin
+Installed /Library/Python/2.7/site-packages/pip-1.4.1-py2.7.egg
+Processing dependencies for pip
+Finished processing dependencies for pip
+
+Install Ansible
+
+> sudo pip install ansible
+...lots of output and warnings you can ignore...
+Successfully installed ansible paramiko jinja2 PyYAML pycrypto ecdsa markupsafe
+Cleaning up...
+
+Upgrade Ansible
+
+When a new release of Ansible comes out, you can easily upgrade to the new version like this:
+
+> sudo pip install ansible --upgrade

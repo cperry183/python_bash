@@ -1,0 +1,8 @@
+    # This task updates our Ubuntu based systems
+    - name: .deb do dist-upgrade
+      apt: >
+        update_cache=yes
+        cache_valid_time=1200
+        upgrade=dist
+      when: >
+        ansible_distribution == 'Ubuntu'

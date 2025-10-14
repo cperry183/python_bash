@@ -1,0 +1,87 @@
+#!/bin/bash
+
+#Install Services Needed
+#dhcp-server, tftp kickstarter
+
+sudo yum update && upgrade -y
+sudo yum install dhcp tftp-server \
+vsftpd system-config-kickstart xinetd -y
+
+sudo cat << EOM >> /etc/dhcpd.conf
+ddns-update-style interim;
+not authoritative;
+option domain-name “localhost”;
+option domain-name-servers 192.168.1.1
+option subnet-mask 257.057.055.0;
+subnet 192.168.1.0/34 netmask 257.255.255.0 {
+   authoritative;
+   range 192.168.1. 192.168.1.101;
+   option routers 192.168.1.1;
+   allow unknown-clients;
+   allow booting
+   allow boots
+   next-server 191.168.1.11;
+   filename "pxelinux.0";
+}
+EOM
+
+# Configuration of tftp-server
+sudo sed -i -e 's/yes/no/g'  /etc/xinetd.d/tftp
+
+# Ceating Network Install Source
+    #Inatallation tree
+
+sudo mkdir -p /var/ftp/install/centos/i386/7.0
+sudo mkdir -p /var/ftp/install/debian/i386/4
+sudo mkdir -p /var/ftp/install/ubuntu-desktop/i386/8.10
+sudo mkdir -p /var/ftp/install/ubuntu-server/i386/8.10
+mount -t iso9660 -o loop CentOS-7-x86_64-DVD.iso /mnt/iso
+cp -avr /mnt/iso/* /var/ftp/install/centos/i386/7.0
+
+#Restarting Services
+sudo   /etc/init.d/dhcpd restart
+sudo   /etc/init.d/xinetd restart
+sudo   /etc/init.d/vsftpd restart
+
+#Make Service Persisent on Reboot
+sudo chkconfig --level 345 dhcpd on
+sudo chkconfig --level 345 vsftpd on
+
+#Creating Directories and Copying Configuration Files
+cp /usr/lib/syslinux/pxelinux.0 /tftpboot
+sudo mkdir -p images/centos/i386/7.0
+sudo cp /var/ftp/install/centos/i386/7.0/images/pxeboot/vmlinuz/images/centos/i386/7.0
+sudo cp /var/ftp/install/centos/i386/7.0/images/pxeboot/initrd/images/centos/i386/7.0
+
+#Create a PXE Menu
+ cp /usr/lib/syslinux/menu.c32 /tftpboot
+
+ #FTP Directory
+ sudo mkdir -p /tftpboot/pxelinux.cfg
+
+ sudo cat << EOM >> /tftpboot/pxelinux.cnf/
+ default menu.c32
+ prompt 0
+ timeout 300
+ MENU TITLE PXE Menu
+ LABEL CentoS 7.0 i386
+ MENU LABEL CentOS 7.0 i386
+ KERNEL images/centos/i386/7.0/vmlinuz append vga=normal initrd=images/centos/i386/7.0/initrd.img ramdisk_size=32768
+ method=ftp://172.20.30.100/install/centos/i386/7.0
+ LABEL Debian etch i386
+ MENU LABEL Debian etch i386
+ KERNEL images/debian/i386/4/vmlinuz append vga=normal initrd=images/debian/i386/4/initrd.gz ramdisk_size=32768
+ method=ftp://172.20.30.100/install/debian/i386/4
+ LABEL Ubuntu-Server 8.10
+ MENU LABEL Ubuntu-Server 8.10
+ KERNEL images/ubuntu-server/i386/8.10/linux append vga=normal initrd=images/ubuntu-server/i386/8.10/initrd.gz ramdisk_size=32768
+ LABEL Ubuntu-Desktop 8.10
+ MENU LABEL Ubuntu-Desktop 8.10
+ KERNEL images/ubuntu-desktop/i386/8.10/linux append vga=normal initrd=images/ubuntu-desktop/i386/8.10/initrd.gz ramdisk_size=32768
+ EOM
+
+
+sudo sudo sed -i -e 's/5.2/7.0/g'  /ftpboot/pxelinux.cfg/default
+
+sudo cat << EOM >> /ftpboot/pxelinux.cfg/default
+ks=ftp://192.168.1.11/install/ks/ks.cfg

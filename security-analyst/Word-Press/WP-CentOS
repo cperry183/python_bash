@@ -1,0 +1,62 @@
+#!/bin/bash
+#Word Press CentOS 7
+
+#Apache setup
+sudo yum install httpd wget curl rsync -y
+sudo systemctl start httpd.service
+sudo systemctl enable httpd.service
+ip addr show eth0 | grep inet | awk '{ print $2; }' | sed 's/\/.*$//'
+
+#MySQL setup
+sudo yum install mariadb-server mariadb -y
+sudo systemctl start mariadb
+sudo mysql_secure_installation
+sudo systemctl enable mariadb.service
+
+#Added a script within this script.
+#!/bin/bash
+# Here you define the absolute path of your script
+scriptPath="/home/chadp/createdb.sh/"
+
+# Name of your script
+scriptName="createdb.sh"
+
+# Here you execute your script
+$scriptPath/$scriptName
+
+# Result of script execution
+result=$?
+
+#Install PHP
+sudo yum install php php-mysql -y
+sudo systemctl restart httpd.service
+
+#Setup Firewall Rules
+sudo firewall-cmd --permanent --zone=public --add-service=http
+sudo firewall-cmd --permanent --zone=public --add-service=https
+sudo firewall-cmd --reload
+
+#Install WordPress
+sudo yum install php-gd -y
+sudo service httpd restart
+cd ~
+wget http://wordpress.org/latest.tar.gz
+tar xzvf latest.tar.gz
+sudo rsync -avP ~/wordpress/ /var/www/html/
+mkdir /var/www/html/wp-content/uploads
+sudo chown -R apache:apache /var/www/html/*
+#
+#Configure WordPress
+echo "Change the following in wp-config.ph"
+echo "define('DB_NAME', 'ZACH');"
+echo "define('DB_USER', 'chadp');""
+echo "define('DB_PASSWORD', 'Shakespeare1@32');"
+
+cd /var/www/html
+cp wp-config-sample.php wp-config.php
+sudo vi wp-config.php
+
+#Complete Installation Through the Web Interface
+ip addr show eth0 | grep inet | awk '{ print $2; }' | sed 's/\/.*$//'
+
+

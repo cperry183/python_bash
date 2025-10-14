@@ -1,0 +1,33 @@
+---
+- name: SSH KEY ROTATION | generate keys
+  host: octo
+  vars:
+    ssh_key_bits: 4096
+    passphrase: 83g!8bfu5M5yy84t
+    ssh_key_comment: domain@example.com
+    ssh_key_path: '{{ inventory_dir }}/new-ssh-key'
+    is_exclusive: no
+    ssh_host_user: vagrant
+  tasks:
+    - name: Generate a new ssh Key
+      command: ssh-keygen
+        -t rsa
+        -b {{ ssh_key_bits }}
+        -N "{{ passphrase }}" -q
+        -f {{ ssh_key_path }}
+        -c {{ ssh_key_comment }}
+    - name: Store then value of the public ssh key
+        set_fact:
+          ssh_connection_key: "{{ lookup('file', ssh_key_path + '.pub') }}"
+    -name: Set Authorized key(s) to the authorized key file
+      become: yes
+      become_user: root
+      authorized_key:
+        exclusive: '{{ is_exclusive }}'
+      user: '{{ ssh_host_user }}'
+      state: present
+      key: "{{ ssh_connection_key }}"
+      
+      args:
+        creates: '{{ ssh_key_path }}'
+      delegate_to: localhost
