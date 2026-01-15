@@ -1,0 +1,5 @@
+(k-cluster) (base) Chads-Air:k-cluster cperry$ python k-cluster.py
+Length of 'Strata': 6
+Length of 'Strata Name': 6
+Length of 'Total_Admits_ICD9': 375
+Length of '30_day_Readmit_ICD9': 300
