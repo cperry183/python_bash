@@ -1,0 +1,1 @@
+ cat /tmp/all_reports | sort -u | sed 's/://g' | awk '{print $1}'|xargs -I % pdsh -w % '/opt/CrowdStrike/falconctl -g --aid --cid --rfm-state --version'
